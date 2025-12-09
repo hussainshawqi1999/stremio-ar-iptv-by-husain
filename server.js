@@ -13,36 +13,30 @@ app.get('/', (req, res) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>AR IPTV Setup</title>
+        <title>IPTV Fix V10</title>
         <style>
             body { background-color: #0f0f0f; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
             .container { background: #1a1a1a; padding: 40px; border-radius: 16px; width: 90%; max-width: 480px; text-align: center; border: 1px solid #333; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
             h2 { margin: 0 0 20px 0; color: #4ade80; }
-            
             .tabs { display: flex; gap: 10px; margin-bottom: 20px; background: #222; padding: 5px; border-radius: 8px; }
             .tab { flex: 1; padding: 10px; cursor: pointer; border-radius: 6px; font-weight: bold; color: #888; transition: 0.3s; }
             .tab.active { background: #4ade80; color: #000; }
-            
             .form-group { display: none; text-align: left; }
             .form-group.active { display: block; }
-            
             label { display: block; margin: 10px 0 5px; color: #ccc; font-size: 0.9em; }
             input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: white; box-sizing: border-box; font-size: 1em; }
             input:focus { border-color: #4ade80; outline: none; }
-
             button { width: 100%; padding: 15px; margin-top: 25px; border-radius: 8px; border: none; background: #4ade80; color: #000; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: 0.2s; }
             button:hover { background: #22c55e; transform: translateY(-2px); }
         </style>
     </head>
     <body>
         <div class="container">
-            <h2>⚡ IPTV Setup V9</h2>
-            
+            <h2>⚡ IPTV V10 (Stream Fix)</h2>
             <div class="tabs">
                 <div class="tab active" onclick="switchTab('xtream')">Xtream Codes</div>
                 <div class="tab" onclick="switchTab('m3u')">M3U Playlist</div>
             </div>
-
             <div id="xtream-form" class="form-group active">
                 <label>Host URL</label>
                 <input type="text" id="host" placeholder="http://server.com:8080">
@@ -51,18 +45,14 @@ app.get('/', (req, res) => {
                 <label>Password</label>
                 <input type="text" id="pass" placeholder="Password">
             </div>
-
             <div id="m3u-form" class="form-group">
                 <label>M3U Link</label>
-                <input type="text" id="m3uUrl" placeholder="Paste long M3U link here...">
+                <input type="text" id="m3uUrl" placeholder="Paste link...">
             </div>
-
             <button onclick="install()">🚀 Install Addon</button>
         </div>
-
         <script>
             let mode = 'xtream';
-            
             function switchTab(m) {
                 mode = m;
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -70,24 +60,18 @@ app.get('/', (req, res) => {
                 event.target.classList.add('active');
                 document.getElementById(m + '-form').classList.add('active');
             }
-
             function install() {
                 let config = {};
-                
                 if (mode === 'xtream') {
                     let host = document.getElementById('host').value.trim();
                     let user = document.getElementById('user').value.trim();
                     let pass = document.getElementById('pass').value.trim();
-                    
-                    if (!host || !user || !pass) return alert("Please fill all fields");
+                    if (!host || !user || !pass) return alert("Fill all fields");
                     if (!host.startsWith('http')) host = 'http://' + host;
-                    
                     config = { mode: 'xtream', host, user, pass };
                 } else {
                     let url = document.getElementById('m3uUrl').value.trim();
-                    if (!url) return alert("Please paste a link");
-                    
-                    // Smart Check for M3U link
+                    if (!url) return alert("Paste a link");
                     try {
                         let u = new URL(url);
                         let p = new URLSearchParams(u.search);
@@ -98,7 +82,6 @@ app.get('/', (req, res) => {
                         }
                     } catch (e) { config = { mode: 'm3u', url }; }
                 }
-
                 let str = btoa(JSON.stringify(config)).replace(/\\//g, '_').replace(/\\+/g, '-').replace(/=/g, '');
                 window.location.href = 'stremio://' + window.location.host + '/' + str + '/manifest.json';
             }
@@ -110,7 +93,7 @@ app.get('/', (req, res) => {
 
 const AXIOS_CONFIG = {
     headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36' },
-    timeout: 10000 
+    timeout: 15000 
 };
 
 function getConfig(req) {
@@ -171,10 +154,10 @@ app.get('/:config/manifest.json', async (req, res) => {
     } catch (e) {}
 
     const manifest = {
-        id: "org.iptv.v9",
-        version: "1.0.9",
-        name: "IPTV Pro V9",
-        description: "Xtream & M3U Player",
+        id: "org.iptv.v10",
+        version: "1.1.0",
+        name: "IPTV Pro V10",
+        description: "Fixed Stream Playback",
         resources: ["catalog", "meta", "stream"],
         types: ["tv", "movie", "series"],
         catalogs: [
@@ -285,15 +268,32 @@ app.get('/:config/stream/:type/:id.json', (req, res) => {
     const parts = req.params.id.split(':');
     let url = "";
 
-    if (req.params.id.startsWith('m3u:')) url = atob(parts[2]);
-    else {
+    if (req.params.id.startsWith('m3u:')) {
+        url = atob(parts[2]);
+    } else {
         const base = `${config.host}`;
-        if (parts[1] === 'live') url = `${base}/${config.user}/${config.pass}/${parts[2]}`;
-        else if (parts[1] === 'movie') url = `${base}/movie/${config.user}/${config.pass}/${parts[2]}.${parts[3]}`;
-        else if (parts[1] === 'episode') url = `${base}/series/${config.user}/${config.pass}/${parts[2]}.${parts[3]}`;
+        if (parts[1] === 'live') {
+            url = `${base}/live/${config.user}/${config.pass}/${parts[2]}.ts`;
+        }
+        else if (parts[1] === 'movie') {
+            url = `${base}/movie/${config.user}/${config.pass}/${parts[2]}.${parts[3]}`;
+        }
+        else if (parts[1] === 'episode') {
+            url = `${base}/series/${config.user}/${config.pass}/${parts[2]}.${parts[3]}`;
+        }
     }
+
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.json({ streams: [{ title: "Stream", url }] });
+    res.json({ 
+        streams: [{ 
+            title: "📺 Watch Stream", 
+            url: url,
+            behaviorHints: {
+                notWebReady: true, 
+                bingeGroup: "tv"
+            }
+        }] 
+    });
 });
 
 const port = process.env.PORT || 7000;
