@@ -13,77 +13,101 @@ app.get('/', (req, res) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>IPTV Fix V10</title>
+        <title>AR IPTV - By Hussain</title>
         <style>
-            body { background-color: #0f0f0f; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-            .container { background: #1a1a1a; padding: 40px; border-radius: 16px; width: 90%; max-width: 480px; text-align: center; border: 1px solid #333; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-            h2 { margin: 0 0 20px 0; color: #4ade80; }
-            .tabs { display: flex; gap: 10px; margin-bottom: 20px; background: #222; padding: 5px; border-radius: 8px; }
-            .tab { flex: 1; padding: 10px; cursor: pointer; border-radius: 6px; font-weight: bold; color: #888; transition: 0.3s; }
-            .tab.active { background: #4ade80; color: #000; }
-            .form-group { display: none; text-align: left; }
+            body { background-color: #0b0b0b; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+            .container { background: #1a1a1a; padding: 30px; border-radius: 12px; width: 100%; max-width: 450px; text-align: center; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+            h2 { margin-bottom: 20px; color: #fff; }
+            .tabs { display: flex; justify-content: center; margin-bottom: 20px; background: #252525; border-radius: 25px; padding: 5px; }
+            .tab { flex: 1; padding: 10px; cursor: pointer; border-radius: 20px; font-weight: bold; transition: 0.3s; color: #aaa; }
+            .tab.active { background: #6a0dad; color: white; }
+            .form-group { display: none; }
             .form-group.active { display: block; }
-            label { display: block; margin: 10px 0 5px; color: #ccc; font-size: 0.9em; }
-            input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: white; box-sizing: border-box; font-size: 1em; }
-            input:focus { border-color: #4ade80; outline: none; }
-            button { width: 100%; padding: 15px; margin-top: 25px; border-radius: 8px; border: none; background: #4ade80; color: #000; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: 0.2s; }
-            button:hover { background: #22c55e; transform: translateY(-2px); }
+            input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px; border: 1px solid #333; background: #252525; color: white; box-sizing: border-box; }
+            button { width: 100%; padding: 14px; margin-top: 20px; border-radius: 6px; border: none; background: linear-gradient(135deg, #6a0dad, #8a2be2); color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
+            button:hover { transform: scale(1.02); opacity: 0.9; }
+            .logo { width: 60px; margin-bottom: 10px; }
         </style>
     </head>
     <body>
         <div class="container">
-            <h2>⚡ IPTV V10 (Stream Fix)</h2>
+            <img src="https://stremio.com/website/stremio-logo-small.png" class="logo">
+            <h2>AR IPTV Setup</h2>
+            <p style="color: #888; font-size: 0.9em;">By Hussain</p>
+            
             <div class="tabs">
                 <div class="tab active" onclick="switchTab('xtream')">Xtream Codes</div>
                 <div class="tab" onclick="switchTab('m3u')">M3U Playlist</div>
             </div>
+
             <div id="xtream-form" class="form-group active">
-                <label>Host URL</label>
-                <input type="text" id="host" placeholder="http://server.com:8080">
-                <label>Username</label>
+                <input type="text" id="host" placeholder="Host URL (http://domain.com:8080)">
                 <input type="text" id="user" placeholder="Username">
-                <label>Password</label>
-                <input type="text" id="pass" placeholder="Password">
+                <input type="password" id="pass" placeholder="Password">
             </div>
+
             <div id="m3u-form" class="form-group">
-                <label>M3U Link</label>
-                <input type="text" id="m3uUrl" placeholder="Paste link...">
+                <input type="text" id="m3uUrl" placeholder="Paste your M3U URL here">
             </div>
-            <button onclick="install()">🚀 Install Addon</button>
+
+            <button onclick="generateLink()">🚀 Install on Stremio</button>
         </div>
+
         <script>
-            let mode = 'xtream';
-            function switchTab(m) {
-                mode = m;
+            let currentMode = 'xtream';
+            function switchTab(mode) {
+                currentMode = mode;
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.form-group').forEach(f => f.classList.remove('active'));
                 event.target.classList.add('active');
-                document.getElementById(m + '-form').classList.add('active');
+                document.getElementById(mode + '-form').classList.add('active');
             }
-            function install() {
+            
+            function generateLink() {
                 let config = {};
-                if (mode === 'xtream') {
+                
+                if (currentMode === 'xtream') {
                     let host = document.getElementById('host').value.trim();
                     let user = document.getElementById('user').value.trim();
                     let pass = document.getElementById('pass').value.trim();
-                    if (!host || !user || !pass) return alert("Fill all fields");
+                    if (!host || !user || !pass) return alert("Please fill all Xtream fields");
+                    if (host.endsWith('/')) host = host.slice(0, -1);
                     if (!host.startsWith('http')) host = 'http://' + host;
                     config = { mode: 'xtream', host, user, pass };
                 } else {
                     let url = document.getElementById('m3uUrl').value.trim();
-                    if (!url) return alert("Paste a link");
+                    if (!url) return alert("Please paste the M3U URL");
+
                     try {
-                        let u = new URL(url);
-                        let p = new URLSearchParams(u.search);
-                        if (p.get('username') && p.get('password')) {
-                            config = { mode: 'xtream', host: u.origin, user: p.get('username'), pass: p.get('password') };
+                        let urlObj = new URL(url);
+                        let params = new URLSearchParams(urlObj.search);
+                        let user = params.get('username');
+                        let pass = params.get('password');
+
+                        if (user && pass) {
+                            let host = urlObj.origin; 
+                            
+                            config = { 
+                                mode: 'xtream', 
+                                host: host, 
+                                user: user, 
+                                pass: pass 
+                            };
+                            console.log("Auto-detected Xtream config:", config);
                         } else {
-                            config = { mode: 'm3u', url };
+                            // إذا لم نجد بيانات، نستخدمه كرابط M3U عادي
+                            config = { mode: 'm3u', url: url };
                         }
-                    } catch (e) { config = { mode: 'm3u', url }; }
+                    } catch (e) {
+                        config = { mode: 'm3u', url: url };
+                    }
                 }
-                let str = btoa(JSON.stringify(config)).replace(/\\//g, '_').replace(/\\+/g, '-').replace(/=/g, '');
-                window.location.href = 'stremio://' + window.location.host + '/' + str + '/manifest.json';
+                
+                let configStr = btoa(JSON.stringify(config));
+                configStr = configStr.replace(/\\//g, '_').replace(/\\+/g, '-').replace(/=/g, '');
+                
+                const finalUrl = 'stremio://' + window.location.host + '/' + configStr + '/manifest.json';
+                window.location.href = finalUrl;
             }
         </script>
     </body>
@@ -91,211 +115,272 @@ app.get('/', (req, res) => {
     `);
 });
 
-const AXIOS_CONFIG = {
-    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36' },
-    timeout: 15000 
-};
-
 function getConfig(req) {
     try {
-        return JSON.parse(atob(req.params.config.replace(/_/g, '/').replace(/-/g, '+')));
+        let str = req.params.config;
+        str = str.replace(/_/g, '/').replace(/-/g, '+');
+        return JSON.parse(atob(str));
     } catch (e) { return null; }
 }
 
 function sortItems(items) {
     if (!Array.isArray(items)) return [];
-    return items.sort((a, b) => Number(b.stream_id || 0) - Number(a.stream_id || 0));
+    return items.sort((a, b) => {
+        const idA = Number(a.stream_id || a.series_id || 0);
+        const idB = Number(b.stream_id || b.series_id || 0);
+        return idB - idA;
+    });
 }
 
-function parseM3U(content) {
-    const lines = content.split('\n');
+function parseM3U(m3uContent) {
+    const lines = m3uContent.split('\n');
     const items = [];
-    let current = {};
+    let currentItem = {};
     for (let line of lines) {
         line = line.trim();
         if (line.startsWith('#EXTINF')) {
             const info = line.substring(8);
+            const groupMatch = info.match(/group-title="([^"]*)"/);
             const nameParts = info.split(',');
-            current.name = nameParts[nameParts.length - 1].trim();
-            current.group = (info.match(/group-title="([^"]*)"/) || [])[1] || "Other";
-            current.logo = (info.match(/tvg-logo="([^"]*)"/) || [])[1] || null;
+            currentItem.name = nameParts[nameParts.length - 1].trim();
+            currentItem.group = groupMatch ? groupMatch[1] : "Uncategorized";
+            const logoMatch = info.match(/tvg-logo="([^"]*)"/);
+            currentItem.logo = logoMatch ? logoMatch[1] : null;
         } else if (line.startsWith('http')) {
-            current.url = line;
-            current.type = line.match(/\.(mp4|mkv|avi)$/i) ? 'movie' : 'tv';
-            items.push(current);
-            current = {};
+            currentItem.url = line;
+            if (line.match(/\.(mp4|mkv|avi|mov)$/i)) currentItem.type = 'movie';
+            else currentItem.type = 'tv';
+            items.push(currentItem);
+            currentItem = {};
         }
     }
-    return items;
+    return items; 
 }
 
 app.get('/:config/manifest.json', async (req, res) => {
     const config = getConfig(req);
-    if (!config) return res.status(400).send("Invalid");
+    if (!config) return res.status(400).send("Invalid Config");
 
-    let liveGenres = ["All"], movieGenres = ["All"], seriesGenres = ["All"];
+    let liveGenres = ["All"];
+    let movieGenres = ["All"];
+    let seriesGenres = ["All"];
 
     try {
         if (config.mode === 'xtream') {
-            const base = `${config.host}/player_api.php?username=${config.user}&password=${config.pass}`;
-            const [l, v, s] = await Promise.all([
-                axios.get(`${base}&action=get_live_categories`, AXIOS_CONFIG).catch(() => ({ data: [] })),
-                axios.get(`${base}&action=get_vod_categories`, AXIOS_CONFIG).catch(() => ({ data: [] })),
-                axios.get(`${base}&action=get_series_categories`, AXIOS_CONFIG).catch(() => ({ data: [] }))
+            const [liveRes, vodRes, serRes] = await Promise.all([
+                axios.get(`${config.host}/player_api.php?username=${config.user}&password=${config.pass}&action=get_live_categories`, { timeout: 4500 }).catch(e => ({ data: [] })),
+                axios.get(`${config.host}/player_api.php?username=${config.user}&password=${config.pass}&action=get_vod_categories`, { timeout: 4500 }).catch(e => ({ data: [] })),
+                axios.get(`${config.host}/player_api.php?username=${config.user}&password=${config.pass}&action=get_series_categories`, { timeout: 4500 }).catch(e => ({ data: [] }))
             ]);
-            if (Array.isArray(l.data)) liveGenres = l.data.map(c => c.category_name);
-            if (Array.isArray(v.data)) movieGenres = v.data.map(c => c.category_name);
-            if (Array.isArray(s.data)) seriesGenres = s.data.map(c => c.category_name);
+            
+            if (Array.isArray(liveRes.data)) liveGenres = liveRes.data.map(c => c.category_name);
+            if (Array.isArray(vodRes.data)) movieGenres = vodRes.data.map(c => c.category_name);
+            if (Array.isArray(serRes.data)) seriesGenres = serRes.data.map(c => c.category_name);
+
         } else if (config.mode === 'm3u') {
-            const { data } = await axios.get(config.url, AXIOS_CONFIG);
-            const groups = [...new Set(parseM3U(data).map(i => i.group))].sort();
-            liveGenres = groups; movieGenres = groups;
+            const response = await axios.get(config.url, { timeout: 8000 });
+            const items = parseM3U(response.data);
+            const groups = [...new Set(items.map(i => i.group))].sort();
+            liveGenres = groups;
+            movieGenres = groups;
         }
-    } catch (e) {}
+    } catch (e) { }
 
     const manifest = {
-        id: "org.iptv.v10",
-        version: "1.1.0",
-        name: "IPTV Pro V10",
-        description: "Fixed Stream Playback",
+        id: "org.ariptv.hussain.final",
+        version: "1.0.1",
+        name: "AR IPTV - By Hussain",
+        description: "Advanced IPTV player for Stremio. Supports Xtream Codes & M3U playlists with auto-sorting (newest first), fast server-side search, and smart category filtering.",
         resources: ["catalog", "meta", "stream"],
         types: ["tv", "movie", "series"],
         catalogs: [
-            { type: "tv", id: "live", name: "Live TV", extra: [{ name: "genre", options: liveGenres }, { name: "search" }] },
-            { type: "movie", id: "vod", name: "Movies", extra: [{ name: "genre", options: movieGenres }, { name: "search" }] }
+            { type: "tv", id: "iptv-live", name: "Live TV", extra: [{ name: "genre", options: liveGenres }, { name: "search" }, { name: "skip" }] },
+            { type: "movie", id: "iptv-vod", name: "Movies", extra: [{ name: "genre", options: movieGenres }, { name: "search" }, { name: "skip" }] }
         ],
         idPrefixes: ["xtream:", "m3u:"]
     };
 
     if (config.mode === 'xtream') {
-        manifest.catalogs.push({ type: "series", id: "series", name: "Series", extra: [{ name: "genre", options: seriesGenres }, { name: "search" }] });
+        manifest.catalogs.push({ 
+            type: "series", 
+            id: "iptv-series", 
+            name: "TV Shows", 
+            extra: [{ name: "genre", options: seriesGenres }, { name: "search" }, { name: "skip" }] 
+        });
     }
 
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.json(manifest);
 });
 
-app.get('/:config/catalog/:type/:id/:extra?.json', async (req, res) => {
+async function handleCatalog(req, res) {
     const config = getConfig(req);
-    const { type, extra } = req.params;
-    let genre = "All", search = null;
-
+    const { type, id, extra } = req.params;
+    
+    let extraObj = {};
     if (extra) {
-        const p = new URLSearchParams(extra);
-        genre = p.get('genre') || "All";
-        search = p.get('search') || (extra.includes('=') ? null : extra);
+        try {
+            if (extra.includes('=')) {
+                const params = new URLSearchParams(extra);
+                extraObj.genre = params.get('genre');
+                extraObj.search = params.get('search');
+                extraObj.skip = parseInt(params.get('skip')) || 0;
+            } else {
+                extraObj.search = extra; 
+            }
+        } catch(e) {}
     }
 
-    let metas = [];
     try {
-        if (config.mode === 'xtream') {
-            const base = `${config.host}/player_api.php?username=${config.user}&password=${config.pass}`;
-            let act = '', catAct = '';
-            
-            if (type === 'tv') { act = 'get_live_streams'; catAct = 'get_live_categories'; }
-            else if (type === 'movie') { act = 'get_vod_streams'; catAct = 'get_vod_categories'; }
-            else if (type === 'series') { act = 'get_series'; catAct = 'get_series_categories'; }
+        let metas = [];
 
-            if (search) {
-                const { data } = await axios.get(`${base}&action=${act}&search=${encodeURIComponent(search)}`, AXIOS_CONFIG);
-                if (Array.isArray(data)) metas = data;
+        if (config.mode === 'xtream') {
+            let action = '';
+            let catAction = '';
+
+            if (type === 'tv') { action = 'get_live_streams'; catAction = 'get_live_categories'; }
+            else if (type === 'movie') { action = 'get_vod_streams'; catAction = 'get_vod_categories'; }
+            else if (type === 'series') { action = 'get_series'; catAction = 'get_series_categories'; }
+
+            if (extraObj.search) {
+                const searchTerm = encodeURIComponent(extraObj.search);
+                const searchUrl = `${config.host}/player_api.php?username=${config.user}&password=${config.pass}&action=${action}&search=${searchTerm}`;
+                
+                try {
+                    const searchRes = await axios.get(searchUrl, { timeout: 8000 });
+                    if (Array.isArray(searchRes.data) && searchRes.data.length > 0) {
+                        metas = searchRes.data.filter(item => 
+                            item.name && item.name.toLowerCase().includes(extraObj.search.toLowerCase())
+                        );
+                    } 
+                } catch(err) { }
             } else {
-                let catId = "";
-                if (genre !== "All") {
-                    const c = await axios.get(`${base}&action=${catAct}`, AXIOS_CONFIG);
-                    const t = c.data.find(x => x.category_name === genre);
-                    if (t) catId = `&category_id=${t.category_id}`;
+                let categoryId = null;
+                if (extraObj.genre && extraObj.genre !== "All") {
+                    const catRes = await axios.get(`${config.host}/player_api.php?username=${config.user}&password=${config.pass}&action=${catAction}`, { timeout: 4500 });
+                    if (Array.isArray(catRes.data)) {
+                        const target = catRes.data.find(c => c.category_name === extraObj.genre);
+                        if (target) categoryId = target.category_id;
+                    }
                 }
-                const { data } = await axios.get(`${base}&action=${act}${catId}`, AXIOS_CONFIG);
-                if (Array.isArray(data)) metas = data;
+
+                let apiUrl = `${config.host}/player_api.php?username=${config.user}&password=${config.pass}&action=${action}`;
+                if (categoryId) apiUrl += `&category_id=${categoryId}`;
+
+                const response = await axios.get(apiUrl, { timeout: 9000 });
+                metas = Array.isArray(response.data) ? response.data : [];
             }
 
-            if (type !== 'tv') metas = sortItems(metas);
+            if (metas.length > 0) {
+                if (type === 'movie' || type === 'series') {
+                    metas = sortItems(metas);
+                }
+            }
 
-            metas = metas.map(i => ({
-                id: type === 'series' ? `xtream:series:${i.series_id}` : (type === 'movie' ? `xtream:movie:${i.stream_id}:${i.container_extension}` : `xtream:live:${i.stream_id}`),
-                type, name: i.name, poster: i.stream_icon || i.cover,
-                posterShape: type === 'tv' ? 'square' : 'poster'
+            metas = metas.map(item => ({
+                id: type === 'series' ? `xtream:series:${item.series_id}` 
+                    : (type === 'movie' ? `xtream:movie:${item.stream_id}:${item.container_extension}` 
+                    : `xtream:live:${item.stream_id}`),
+                type: type,
+                name: item.name,
+                poster: item.stream_icon || item.cover,
+                posterShape: type === 'movie' || type === 'series' ? 'poster' : 'square'
             }));
+        } 
+        else if (config.mode === 'm3u') {
+            const response = await axios.get(config.url, { timeout: 9000 });
+            let items = parseM3U(response.data);
 
-        } else if (config.mode === 'm3u') {
-            const { data } = await axios.get(config.url, AXIOS_CONFIG);
-            let items = parseM3U(data);
             if (type === 'tv') items = items.filter(i => i.type === 'tv');
-            else items = items.filter(i => i.type === 'movie');
+            else if (type === 'movie') items = items.filter(i => i.type === 'movie');
 
-            if (search) items = items.filter(i => i.name.toLowerCase().includes(search.toLowerCase()));
-            else if (genre !== "All") items = items.filter(i => i.group === genre);
+            if (extraObj.genre && extraObj.genre !== "All") items = items.filter(i => i.group === extraObj.genre);
+            if (extraObj.search) items = items.filter(i => i.name.toLowerCase().includes(extraObj.search.toLowerCase()));
 
-            metas = items.map((i, idx) => ({
-                id: `m3u:${idx}:${btoa(i.url)}`, type, name: i.name, poster: i.logo, posterShape: 'square'
+            if (type === 'movie') {
+                items = items.reverse(); 
+            }
+
+            metas = items.map((item, index) => ({
+                id: `m3u:${index}:${btoa(item.url)}`,
+                type: type,
+                name: item.name,
+                poster: item.logo,
+                posterShape: 'square'
             }));
         }
-        res.json({ metas: metas.slice(0, 100) });
-    } catch (e) { res.json({ metas: [] }); }
-});
+
+        const skip = extraObj.skip || 0;
+        const limit = 100;
+        const finalMetas = metas.slice(skip, skip + limit);
+
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Cache-Control', 'max-age=60'); 
+        res.json({ metas: finalMetas });
+
+    } catch (e) {
+        res.json({ metas: [] });
+    }
+}
+
+app.get('/:config/catalog/:type/:id.json', handleCatalog);
+app.get('/:config/catalog/:type/:id/:extra.json', handleCatalog);
 
 app.get('/:config/meta/:type/:id.json', async (req, res) => {
     const config = getConfig(req);
     const { type, id } = req.params;
     res.setHeader('Access-Control-Allow-Origin', '*');
 
-    if (id.startsWith('m3u:')) return res.json({ meta: { id, type, name: "Stream" } });
+    if (id.startsWith('m3u:')) {
+        return res.json({ meta: { id, type, name: "Watch Stream", description: "M3U Stream" } });
+    }
 
     if (type === 'series' && id.startsWith('xtream:')) {
         try {
-            const sid = id.split(':')[2];
-            const { data } = await axios.get(`${config.host}/player_api.php?username=${config.user}&password=${config.pass}&action=get_series_info&series_id=${sid}`, AXIOS_CONFIG);
+            const parts = id.split(':');
+            const seriesId = parts[2];
+            const url = `${config.host}/player_api.php?username=${config.user}&password=${config.pass}&action=get_series_info&series_id=${seriesId}`;
+            const resp = await axios.get(url, { timeout: 8000 });
+            const info = resp.data;
             let videos = [];
-            if (data.episodes) {
-                Object.values(data.episodes).forEach(season => {
+            if (info.episodes) {
+                Object.values(info.episodes).forEach(season => {
                     season.forEach(ep => {
                         videos.push({
                             id: `xtream:episode:${ep.id}:${ep.container_extension}`,
-                            title: ep.title, season: parseInt(ep.season), episode: parseInt(ep.episode_num), released: new Date().toISOString()
+                            title: ep.title || `Ep ${ep.episode_num}`,
+                            season: parseInt(ep.season),
+                            episode: parseInt(ep.episode_num),
+                            released: new Date().toISOString()
                         });
                     });
                 });
             }
-            return res.json({ meta: { id, type, name: data.info.name, poster: data.info.cover, description: data.info.plot, videos: videos.sort((a, b) => a.season - b.season || a.episode - b.episode) }});
-        } catch(e) {}
+            videos.sort((a, b) => (a.season - b.season) || (a.episode - b.episode));
+            
+            return res.json({ meta: { 
+                id: id, type: 'series', name: info.info.name, poster: info.info.cover, description: info.info.plot, videos: videos 
+            }});
+        } catch(e) { return res.json({ meta: { id, type, name: "Error Info" } }); }
     }
-    res.json({ meta: { id, type, name: "Channel" } });
+    res.json({ meta: { id, type, name: "Watch Now" } });
 });
 
-app.get('/:config/stream/:type/:id.json', (req, res) => {
+app.get('/:config/stream/:type/:id.json', async (req, res) => {
     const config = getConfig(req);
     const parts = req.params.id.split(':');
-    let url = "";
-
+    let streamUrl = "";
     if (req.params.id.startsWith('m3u:')) {
-        url = atob(parts[2]);
+        try { streamUrl = atob(parts[2]); } catch(e){}
     } else {
-        const base = `${config.host}`;
-        if (parts[1] === 'live') {
-            url = `${base}/live/${config.user}/${config.pass}/${parts[2]}.ts`;
-        }
-        else if (parts[1] === 'movie') {
-            url = `${base}/movie/${config.user}/${config.pass}/${parts[2]}.${parts[3]}`;
-        }
-        else if (parts[1] === 'episode') {
-            url = `${base}/series/${config.user}/${config.pass}/${parts[2]}.${parts[3]}`;
-        }
+        if (parts[1] === 'live') streamUrl = `${config.host}/${config.user}/${config.pass}/${parts[2]}`;
+        else if (parts[1] === 'movie') streamUrl = `${config.host}/movie/${config.user}/${config.pass}/${parts[2]}.${parts[3]}`;
+        else if (parts[1] === 'episode') streamUrl = `${config.host}/series/${config.user}/${config.pass}/${parts[2]}.${parts[3]}`;
     }
-
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.json({ 
-        streams: [{ 
-            title: "📺 Watch Stream", 
-            url: url,
-            behaviorHints: {
-                notWebReady: true, 
-                bingeGroup: "tv"
-            }
-        }] 
-    });
+    res.json({ streams: [{ title: "Stream", url: streamUrl }] });
 });
 
 const port = process.env.PORT || 7000;
 if (process.env.VERCEL) module.exports = app;
-else app.listen(port, () => console.log(`Running on ${port}`));
+else app.listen(port, () => console.log(`Run: http://localhost:${port}`));
