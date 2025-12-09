@@ -75,7 +75,22 @@ app.get('/', (req, res) => {
                 } else {
                     let url = document.getElementById('m3uUrl').value.trim();
                     if (!url) return alert("Please paste the M3U URL");
-                    config = { mode: 'm3u', url };
+                    
+                    try {
+                        let u = new URL(url);
+                        let params = new URLSearchParams(u.search);
+                        let user = params.get('username');
+                        let pass = params.get('password');
+                        
+                        if (user && pass) {
+                            let host = u.origin;
+                            config = { mode: 'xtream', host, user, pass };
+                        } else {
+                            config = { mode: 'm3u', url };
+                        }
+                    } catch (e) {
+                        config = { mode: 'm3u', url };
+                    }
                 }
                 
                 let configStr = btoa(JSON.stringify(config));
@@ -129,7 +144,6 @@ function parseM3U(m3uContent) {
             currentItem = {};
         }
     }
-    // هنا لا نعكس الترتيب فوراً، سنتركه لدالة sortItems لاحقاً
     return items; 
 }
 
@@ -247,7 +261,6 @@ async function handleCatalog(req, res) {
                 metas = Array.isArray(response.data) ? response.data : [];
             }
 
-            // === هنا التعديل: الترتيب فقط للأفلام والمسلسلات ===
             if (metas.length > 0) {
                 if (type === 'movie' || type === 'series') {
                     metas = sortItems(metas);
@@ -274,7 +287,6 @@ async function handleCatalog(req, res) {
             if (extraObj.genre && extraObj.genre !== "All") items = items.filter(i => i.group === extraObj.genre);
             if (extraObj.search) items = items.filter(i => i.name.toLowerCase().includes(extraObj.search.toLowerCase()));
 
-            // ترتيب M3U فقط للأفلام
             if (type === 'movie') {
                 items = items.reverse(); 
             }
