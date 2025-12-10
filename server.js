@@ -62,9 +62,12 @@ app.get('/', (req, res) => {
                 event.target.classList.add('active');
                 document.getElementById(mode + '-form').classList.add('active');
             }
+            
             function generateLink() {
                 let config = {};
+                
                 if (currentMode === 'xtream') {
+                    // 1. الوضع اليدوي
                     let host = document.getElementById('host').value.trim();
                     let user = document.getElementById('user').value.trim();
                     let pass = document.getElementById('pass').value.trim();
@@ -73,9 +76,39 @@ app.get('/', (req, res) => {
                     if (!host.startsWith('http')) host = 'http://' + host;
                     config = { mode: 'xtream', host, user, pass };
                 } else {
+                    // 2. وضع M3U (هنا التعديل الذكي)
                     let url = document.getElementById('m3uUrl').value.trim();
                     if (!url) return alert("Please paste the M3U URL");
-                    config = { mode: 'm3u', url };
+
+                    try {
+                        // محاولة استخراج بيانات Xtream من الرابط
+                        let urlObj = new URL(url);
+                        let params = new URLSearchParams(urlObj.search);
+                        let user = params.get('username');
+                        let pass = params.get('password');
+
+                        if (user && pass) {
+                            // إذا وجدنا يوزر وباسورد، نحول الوضع إلى Xtream
+                            // urlObj.origin يعطينا الهوست مع البورت (أو بدون بورت حسب الرابط)
+                            // مثال: http://host.com:8080 أو http://host.com
+                            let host = urlObj.origin; 
+                            
+                            config = { 
+                                mode: 'xtream', 
+                                host: host, 
+                                user: user, 
+                                pass: pass 
+                            };
+                            // تنبيه بسيط للمستخدم (اختياري)
+                            console.log("Auto-detected Xtream config:", config);
+                        } else {
+                            // إذا لم نجد بيانات، نستخدمه كرابط M3U عادي
+                            config = { mode: 'm3u', url: url };
+                        }
+                    } catch (e) {
+                        // إذا كان الرابط غير صالح، نستخدمه كما هو كـ M3U
+                        config = { mode: 'm3u', url: url };
+                    }
                 }
                 
                 let configStr = btoa(JSON.stringify(config));
@@ -129,7 +162,6 @@ function parseM3U(m3uContent) {
             currentItem = {};
         }
     }
-    // هنا لا نعكس الترتيب فوراً، سنتركه لدالة sortItems لاحقاً
     return items; 
 }
 
@@ -247,7 +279,6 @@ async function handleCatalog(req, res) {
                 metas = Array.isArray(response.data) ? response.data : [];
             }
 
-            // === هنا التعديل: الترتيب فقط للأفلام والمسلسلات ===
             if (metas.length > 0) {
                 if (type === 'movie' || type === 'series') {
                     metas = sortItems(metas);
@@ -274,7 +305,6 @@ async function handleCatalog(req, res) {
             if (extraObj.genre && extraObj.genre !== "All") items = items.filter(i => i.group === extraObj.genre);
             if (extraObj.search) items = items.filter(i => i.name.toLowerCase().includes(extraObj.search.toLowerCase()));
 
-            // ترتيب M3U فقط للأفلام
             if (type === 'movie') {
                 items = items.reverse(); 
             }
